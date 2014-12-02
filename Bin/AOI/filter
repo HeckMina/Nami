@@ -1,0 +1,11 @@
+print("请输入需要过滤文件");
+file=io.read();
+print("请过滤用的关键字");
+keyword=io.read();
+print(file,keyword);
+io.input(file);
+io.output("result_"+file);
+line=io.read();
+io.write(line);
+io.input(io.stdin);
+io.output(io.stdout);

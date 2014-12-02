@@ -1,0 +1,74 @@
+print(_VERSION);
+print("please input the path:");
+files=Dir.GetAllFiles("E:/StreamingAssets/Compond/07_NewTown");
+count={	prefab=0,
+		fbx=0,
+		controller=0,
+        png=0, 
+        exr=0, 
+        tga=0, 
+        tif=0, 
+        asset=0, 
+        jpg=0, 
+        jpeg=0, 
+        psd=0, 
+        mp3=0, 
+        wav=0, 
+        mat=0, 
+        unity=0, 
+        anim=0,
+        shader=0,
+        ttf=0};
+local resIndex=io.open("res.txt","w");
+for key,value in pairs(files) do
+	if string.find(value,"%.[Pp][Rr][Ee][Ff][Aa][Bb]%.u")~=nil then
+		count.prefab=count.prefab+1;
+	elseif string.find(value,"%.[Ff][Bb][Xx]%.")~=nil then
+		count.fbx=count.fbx+1;
+	elseif string.find(value,"%.[Cc][Oo][Nn][Tt][Rr][Oo][Ll][Ll][Ee][Rr]%.")~=nil then
+		count.controller=count.controller+1;
+	elseif string.find(value,"%.[Pp][Nn][Gg]%.")~=nil then
+		count.png=count.png+1;
+	elseif string.find(value,"%.[Ee][Xx][Rr]%.")~=nil then
+		count.exr=count.exr+1;
+	elseif string.find(value,"%.[Tt][Gg][Aa]%.")~=nil then
+		count.tga=count.tga+1;
+	elseif string.find(value,"%.[Tt][Ii][Ff]%.")~=nil then
+		count.tif=count.tif+1;
+	elseif string.find(value,"%.[Aa][Ss][Ss][Ee][Tt]%.")~=nil then
+		count.asset=count.asset+1;
+	elseif string.find(value,"%.[Jj][Pp][Gg]%.")~=nil then
+		count.jpg=count.jpg+1;
+	elseif string.find(value,"%.[Jj][Pp][Ee][Gg]%.")~=nil then
+		count.jpeg=count.jpeg+1;
+	elseif string.find(value,"%.[Pp][Ss][Dd]%.")~=nil then
+		count.psd=count.psd+1;
+	elseif string.find(value,"%.[Mm][Pp]3%.")~=nil then
+		count.mp3=count.mp3+1;
+	elseif string.find(value,"%.[Ww][Aa][Vv]%.")~=nil then
+		count.wav=count.wav+1;
+	elseif string.find(value,"%.[Mm][Aa][Tt]%.")~=nil then
+		count.mat=count.mat+1;
+	elseif string.find(value,"%.[Uu][Nn][Ii][Tt][Yy]%.")~=nil then
+		count.unity=count.unity+1;
+	elseif string.find(value,"%.[Aa][Nn][Ii][Mm]%.")~=nil then
+		count.anim=count.anim+1;
+	elseif string.find(value,"%.[Ss][Hh][Aa][Dd][Ee][Rr]%.")~=nil then
+		count.shader=count.shader+1;
+	elseif string.find(value,"%.[Tt][Tt][Ff]%.")~=nil then
+		count.ttf=count.ttf+1;
+	end
+	if string.find(value,"%.[Xx][Mm][Ll]")==nil and string.find(value,"%.[Tt][Xx][Tt]")==nil then
+		path=string.gsub(value,"%a*:\/%w+\/MogoResources\/","");
+		resIndex:write(path,"\n");
+	end
+end
+
+for key,value in pairs(count) do
+	if key=="controller" then
+	print(key,"==>",value);
+	else
+	print(key .. "      ","==>",value);
+	end
+end
+resIndex:close();

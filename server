@@ -1,0 +1,107 @@
+#!/usr/bin/perl
+use IO::Select;
+use IO::Socket;
+
+$lsn = IO::Socket::INET->new(Listen => 1, LocalPort => 9527);
+$sel = IO::Select->new( $lsn );
+my %tasklist=();
+my %taskOnDoing=();
+while(@ready = $sel->can_read)
+{
+    foreach $fh (@ready)
+	{
+        if($fh == $lsn) {
+             # Create a new socket
+             $new = $lsn->accept;
+             $sel->add($new);
+			 print "a new client is connected! i ma total ha -> ". ($sel->count()-1) . "\n";
+         }
+         else {
+			if($fh)
+			{
+             # Process socket
+			 $_ = <$fh>;
+			 if($_ eq "")
+			 {
+				$sel->remove($fh);
+				$fh->close;
+				print "a client disconnected! i ma total ha -> ".( $sel->count()-1) . "\n";
+			 }
+			 else
+			 {
+				print $_ ;
+				my $ret;
+				@temp=split(/->/);
+				print $temp[0] . "---" .$temp[1] . "\n";
+				if($temp[0] eq "+")
+				{
+					#add a task
+					$tasklist{$temp[1]}=1;
+					$ret="ok\n";
+					@k=keys %tasklist;
+					print "add a new task " . $temp[1];
+				}
+				elsif($temp[0] eq "-")
+				{
+					#delete a task
+					if(exists $tasklist{$temp[1]})
+					{
+						delete $tasklist{$temp[1]};
+						$ret="ok\n";
+					}
+					else
+					{
+						$ret="fail\n";
+					}
+				}
+				elsif($temp[0] eq "^")
+				{
+					if(exists $taskOnDoing{$temp[1]})
+					{
+						delete $taskOnDoing{$temp[1]};
+						$ret="ok\n";
+					}
+					else
+					{
+						$ret="fail\n";
+					}
+				}
+				elsif($temp[0] eq "~")
+				{
+					#get a task
+					if(%tasklist)
+					{
+						@k=keys %tasklist;
+						$ret=$k[0];
+						$taskOnDoing{$k[0]}=1;
+						delete $tasklist{$k[0]};
+					}
+					else
+					{
+						$ret="neyo\n";
+					}
+				}
+				elsif($temp[0] eq "?")
+				{
+					#query for the progress
+					if(%tasklist)
+					{
+						@k=keys %tasklist;
+						$ret= @k;
+					}
+					else
+					{
+						$ret="0/0\n";
+					}
+				}
+
+				$fh->send($ret,0);
+			 }
+			}
+			else
+			{
+				
+			}
+         }
+     }
+}

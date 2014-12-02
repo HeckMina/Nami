@@ -1,0 +1,18 @@
+EXE			=	FileSystem.dll
+OPTIONS		= 	/clr
+INCLUDES 	= 	
+LIBPATHES	=	
+SYSTEMLIBS	=	 
+LIBS		= 	
+OBJS		= 	FileSystem.obj test.obj
+all:	$(EXE)
+$(EXE): $(OBJS)
+	link  $(LIBPATHES) /dll /out:$(EXE) $(OBJS) $(SYSTEMLIBS) $(LIBS)
+
+$(OBJS):
+	cl /c *.cpp $(OPTIONS) $(INCLUDES)
+	
+clean:
+	del *.exp
+	del *.obj
+	del *.dll

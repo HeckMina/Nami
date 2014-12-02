@@ -1,0 +1,7 @@
+print(_VERSION);
+--a=test();
+--print(a.name);
+--print(a.age);
+function X()
+	print("hello X");
+end

@@ -1,0 +1,108 @@
+function fsize (file)
+    local current = file:seek()
+    local size = file:seek("end")
+    file:seek("set", current)
+    return size
+end
+
+function upload(socket,filename)
+	print("upload file " .. filename);
+	local file=io.open(filename,"rb");
+	local filesize=fsize(file);
+	local data,c,t,l,d;
+	--tell server to create a file
+	print("file size is "..filesize);
+	data,l=Pack(2,1,string.len(filename),filename);
+	print("send buffer len "..l);
+	Socket.Send(socket,data,l);
+	c,t,l,d=Socket.Recv(socket);
+	if d=="sucess" then
+		print("create file sucess");
+	else
+		print("create file fail");
+		return 1;
+	end
+	--loop to upload the file content
+	local current=0;
+	repeat
+		if filesize-current>=1019 then
+			data=file:read(1019);
+			data,l=Pack(2,2,1019,data);
+			Socket.Send(socket,data,l);
+			c,t,l,d=Socket.Recv(socket);
+			if d=="sucess" then
+				current=current+1019;
+			end
+		else
+			data=file:read(filesize-current);
+			data,l=Pack(2,2,filesize-current,data);
+			Socket.Send(socket,data,l);
+			c,t,l,d=Socket.Recv(socket);
+			if d=="sucess" then
+				current=filesize;
+			end
+		end
+		print("write file to server sucess current progress"..current.."/"..filesize);
+	until current >= filesize;
+	--tell server upload over
+	data,l=Pack(2,3,0);
+	Socket.Send(socket,data,l);
+	c,t,l,d=Socket.Recv(socket);
+	if d=="sucess" then
+		print("close server file sucess");
+	else
+		print("close file fail");
+	end
+	file:close();
+	print("file total size is :"..filesize);
+end
+
+System.BeginConsoleInputThread();
+print("welcome to namespace van");
+NetWork.Init();
+local socket=Socket.New();
+Socket.Init(socket);
+local ip="172.16.10.42";--NetWork.GetIPOf("www.minamivision.com");
+Socket.Connect(socket,ip,9527);
+local data=Pack(1,1,0);
+local sayhitoserver=Pack(1,1,0);
+local flag=0;
+local tasksfinished=0;
+
+repeat
+	Socket.Send(socket,sayhitoserver,5);
+	local c,t,l,d=Socket.Recv(socket);
+	if c==1 then
+		if d=="upload your work" then
+			if tasksfinished==0 then
+				print("there is no data to upload!Sleep for 10 seconds");
+				Sleep(10000);
+			else
+				--upload data
+				local files=Dir.GetAllFiles("MogoResourcesOSX/");
+				for key,value in pairs(files) do
+					local path=string.gsub(value,"MogoResourcesOSX\/\/","MogoResourcesOSX\/");
+					upload(socket,path);
+				end
+				tasksfinished=0;
+			end
+		else
+			--build assetbundle for server
+			local cmd="D:/Unity4.3.1/Editor/Unity.exe -quit -batchmode -executeMethod OSXTools.BuildAssetBundleWithOutMeta ".."\""..d.."\"";
+			print(cmd);
+			os.execute(cmd);
+		end
+	elseif c==2 then
+		print("upload work sucess!");
+	elseif c==3 then
+		print("delegate work sucess!");
+	elseif c==4 then
+		print("query for current progress return from server!");
+	elseif c==100 then
+		print("server says exit!");
+		flag=1;
+	elseif c==101 then
+		print("server says i can update myself");
+	end
+until flag==1;
+exit(0);

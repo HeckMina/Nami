@@ -1,0 +1,1 @@
+1http://172.16.10.87/test/ios/Van/version.txt/test/ios/Van/updatelist.txt
